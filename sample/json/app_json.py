@@ -5,25 +5,25 @@ from google import genai
 from google.genai import types
 
 # ページ設定
-st.set_page_config(page_title="俳句ジェネレーター", page_icon="🌸")
+st.set_page_config(page_title="怪談話", page_icon="👻")
 
 # タイトル
-st.title("🌸 俳句ジェネレーター")
-st.write("テキストを入力すると、AIが俳句を作成します")
+st.title("👻怪談話")
+st.write("テキストを入力すると、AIが怖い話を作成します")
 
 # テキスト入力
 input_text = st.text_area(
     "テキストを入力してください",
-    placeholder="例: 春の訪れとともに、桜の花が咲き始めました。",
-    height=100
+    placeholder="例: 深夜のコンビニで起きた不思議な出来事について怖い話を作って。",
+    height=120
 )
 
 # 生成ボタン
-if st.button("俳句を生成", type="primary"):
+if st.button("怪談を生成", type="primary"):
     if not input_text:
         st.warning("テキストを入力してください")
     else:
-        with st.spinner("俳句を作成中..."):
+        with st.spinner("怪談を生成中..."):
             try:
                 # APIキー取得
                 api_key = os.environ.get("GEMINI_API_KEY")
@@ -34,13 +34,18 @@ if st.button("俳句を生成", type="primary"):
                 # クライアント初期化
                 client = genai.Client(api_key=api_key)
 
-                # プロンプト作成
+                # プロンプト作成（出力はJSON）
                 contents = [
                     types.Content(
                         role="user",
                         parts=[
                             types.Part.from_text(
-                                text=f"次のテキストについて俳句を作成してください:\n{input_text}\n出力はJSON形式{{'haiku': 'ここに俳句','kigo': '春or夏or秋or冬or不明'}}です。他の情報は含めないでください。"
+                                text=(
+                                    f"次のテキストについて怪談を作成してください:\n{input_text}\n\n"
+                                    "出力はJSON形式で次のキーのみを含めてください:\n"
+                                    "{'story': 'ここに怪談の本文', 'tone': '不気味or恐怖or悲哀or不明'}\n"
+                                    "他の情報や説明は含めないでください。"
+                                )
                             ),
                         ],
                     ),
@@ -53,7 +58,7 @@ if st.button("俳句を生成", type="primary"):
                     config=types.GenerateContentConfig(),
                 )
 
-                # JSONパース（マークダウン形式に対応）
+                # レスポンス整形（コードブロックを除去）
                 response_text = response.text.strip()
                 if response_text.startswith("```"):
                     lines = response_text.split("\n")
@@ -63,27 +68,27 @@ if st.button("俳句を生成", type="primary"):
                         lines = lines[:-1]
                     response_text = "\n".join(lines)
 
-                haiku_data = json.loads(response_text)
-                haiku = haiku_data.get("haiku", "")
-                kigo = haiku_data.get("kigo", "不明")
+                # JSONパース
+                story_data = json.loads(response_text)
+                story = story_data.get("story", "").strip()
+                tone = story_data.get("tone", "不明").strip()
 
-                # 季節ごとの色設定
-                season_colors = {
-                    "春": "#FFB7C5",  # ピンク
-                    "夏": "#87CEEB",  # スカイブルー
-                    "秋": "#FF8C00",  # ダークオレンジ
-                    "冬": "#FFFFFF",  # パウダーブルー
-                    "不明": "#A9A9A9"  # グレー
+                # トーンごとの色設定
+                tone_colors = {
+                    "不気味": "#2F4F4F",   # ダークグレー
+                    "恐怖": "#8B0000",     # ダークレッド
+                    "悲哀": "#4B0082",     # インディゴ
+                    "不明": "#A9A9A9"      # グレー
                 }
-
-                color = season_colors.get(kigo, "#A9A9A9")
+                bg_color = tone_colors.get(tone, "#A9A9A9")
+                text_color = "white" if tone != "不明" else "black"
 
                 # 結果表示
                 st.success("生成完了！")
-                st.markdown(f"### 季語: {kigo}")
+                st.markdown(f"### トーン: {tone}")
                 st.markdown(
-                    f'<div style="background-color: {color}; padding: 20px; border-radius: 10px; text-align: center;">'
-                    f'<h2 style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">{haiku}</h2>'
+                    f'<div style="background-color: {bg_color}; padding: 20px; border-radius: 10px; text-align: left;">'
+                    f'<p style="color: {text_color}; white-space: pre-wrap; line-height: 1.6; margin: 0;">{story}</p>'
                     f'</div>',
                     unsafe_allow_html=True
                 )

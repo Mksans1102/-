@@ -7,6 +7,26 @@ from google.genai import types
 # ページ設定
 st.set_page_config(page_title="怪談話", page_icon="👻")
 
+# CSS でページ背景をカスタマイズ
+st.markdown("""
+<style>
+    body {
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        background-attachment: fixed;
+    }
+    .stApp {
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        background-attachment: fixed;
+    }
+    h1 {
+        color: white !important;
+    }
+    p, div {
+        color: white !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # タイトル
 st.title("👻怪談話")
 st.write("テキストを入力すると、AIが怖い話を作成します")
@@ -73,22 +93,60 @@ if st.button("怪談を生成", type="primary"):
                 story = story_data.get("story", "").strip()
                 tone = story_data.get("tone", "不明").strip()
 
-                # トーンごとの色設定
-                tone_colors = {
-                    "不気味": "#2F4F4F",   # ダークグレー
-                    "恐怖": "#8B0000",     # ダークレッド
-                    "悲哀": "#4B0082",     # インディゴ
-                    "不明": "#A9A9A9"      # グレー
+                # トーンごとの色・アイコン設定
+                tone_config = {
+                    "不気味": {
+                        "icon": "👁️",
+                        "bg_color": "#1a1a2e",
+                        "text_color": "#00d4ff",
+                        "border_color": "#00d4ff"
+                    },
+                    "恐怖": {
+                        "icon": "😱",
+                        "bg_color": "#2d0a0a",
+                        "text_color": "#ff6b6b",
+                        "border_color": "#ff6b6b"
+                    },
+                    "悲哀": {
+                        "icon": "😢",
+                        "bg_color": "#1a0f2e",
+                        "text_color": "#b19cd9",
+                        "border_color": "#b19cd9"
+                    },
+                    "不明": {
+                        "icon": "❓",
+                        "bg_color": "#2a2a2a",
+                        "text_color": "#cccccc",
+                        "border_color": "#666666"
+                    }
+                    
                 }
-                bg_color = tone_colors.get(tone, "#A9A9A9")
-                text_color = "white" if tone != "不明" else "black"
+                
+                config = tone_config.get(tone, tone_config["不明"])
 
                 # 結果表示
-                st.success("生成完了！")
-                st.markdown(f"### トーン: {tone}")
+                st.success("ﾋｭｰﾄﾞﾛﾄﾞﾛﾄﾞﾛ…")
+                
+                # トーン表示
+                st.markdown(f"### {config['icon']} トーン: {tone}")
+                
+                # 怪談本文を見やすく表示
                 st.markdown(
-                    f'<div style="background-color: {bg_color}; padding: 20px; border-radius: 10px; text-align: left;">'
-                    f'<p style="color: {text_color}; white-space: pre-wrap; line-height: 1.6; margin: 0;">{story}</p>'
+                    f'<div style="'
+                    f'background-color: {config["bg_color"]}; '
+                    f'padding: 25px; '
+                    f'border-radius: 12px; '
+                    f'border-left: 5px solid {config["border_color"]}; '
+                    f'text-align: left; '
+                    f'box-shadow: 0 4px 6px rgba(0,0,0,0.3);'
+                    f'">'
+                    f'<p style="'
+                    f'color: {config["text_color"]}; '
+                    f'white-space: pre-wrap; '
+                    f'line-height: 1.8; '
+                    f'margin: 0; '
+                    f'font-size: 16px;'
+                    f'">{story}</p>'
                     f'</div>',
                     unsafe_allow_html=True
                 )

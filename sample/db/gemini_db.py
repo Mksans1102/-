@@ -20,8 +20,8 @@ client = genai.Client(
 model = "gemini-flash-lite-latest"
 
 # データベースファイルのパス
-# このスクリプトと同じディレクトリにhaiku.dbを作成
-db_path = os.path.join(os.path.dirname(__file__), "haiku.db")
+# このスクリプトと同じディレクトリにhaiku.dbを作成<- kaidan.dbに変更
+db_path = os.path.join(os.path.dirname(__file__), "kaidan.db")
 
 
 def init_database():
@@ -34,7 +34,7 @@ def init_database():
     
     # 俳句を保存するテーブルを作成
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS haikus (
+        CREATE TABLE IF NOT EXISTS kaidan (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             haiku TEXT NOT NULL,
             created_at TIMESTAMP NOT NULL
@@ -45,12 +45,12 @@ def init_database():
     conn.close()
 
 
-def save_haiku(haiku: str) -> int:
+def save_kaidan(kaidan: str) -> int:
     """
     俳句をタイムスタンプとともにデータベースに保存する関数
     
     Args:
-        haiku: 保存する俳句のテキスト
+        kaidan: 保存する俳句のテキスト
     
     Returns:
         保存されたレコードのID
@@ -61,10 +61,10 @@ def save_haiku(haiku: str) -> int:
     # 現在のタイムスタンプを取得
     timestamp = datetime.now()
     
-    # 俳句とタイムスタンプをデータベースに挿入
+    # 俳句とタイムスタンプをデータベースに挿入<- 怪談に変更
     cursor.execute(
-        "INSERT INTO haikus (haiku, created_at) VALUES (?, ?)",
-        (haiku, timestamp)
+        "INSERT INTO kaidan (kaidan, created_at) VALUES (?, ?)",
+        (kaidan, timestamp)
     )
     
     # 挿入されたレコードのIDを取得
@@ -76,30 +76,29 @@ def save_haiku(haiku: str) -> int:
     return record_id
 
 
-def get_all_haikus():
+def get_all_kaidans():
     """
     保存されているすべての俳句を取得する関数
     
     Returns:
-        俳句のリスト（id, haiku, created_at）
+        俳句のリスト（id, kaidan, created_at）
     """
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
-    cursor.execute("SELECT id, haiku, created_at FROM haikus ORDER BY created_at DESC")
-    haikus = cursor.fetchall()
+    cursor.execute("SELECT id, kaidan, created_at FROM kaidan ORDER BY created_at DESC")
+    kaidan = cursor.fetchall()
     
     conn.close()
     
-    return haikus
+    return kaidan
 
-
-def generate_haiku() -> str:
+def generate_kaidan() -> str:
     """
-    Gemini APIを使用して俳句を生成する関数
+    Gemini APIを使用して怪談を生成する関数
     
     Returns:
-        生成された俳句のテキスト
+        生成された怪談のテキスト
     """
     # プロンプト（ユーザーからの入力）の構築
     # Contentオブジェクトのリストとして会話履歴を表現する
@@ -108,7 +107,7 @@ def generate_haiku() -> str:
             role="user",  # メッセージの送信者（ユーザー）を指定
             parts=[
                 # Part.from_text()でテキスト形式のメッセージを作成
-                types.Part.from_text(text="俳句を作ってください。俳句のみを出力してください。"),
+                types.Part.from_text(text="怪談話を作成してください。怪談話のみです。"),
             ],
         ),
     ]
@@ -131,20 +130,20 @@ def generate_haiku() -> str:
 # データベースを初期化
 init_database()
 
-# 俳句を生成
-print("--- 俳句を生成中 ---")
-haiku = generate_haiku()
-print(f"生成された俳句:\n{haiku}")
+# 俳句を生成<- 怪談に変更
+print("--- 怪談話を生成中 ---")
+kaidan = generate_kaidan()
+print(f"生成された俳句:\n{kaidan}")
 
 # 俳句をデータベースに保存
-record_id = save_haiku(haiku)
+record_id = save_kaidan(kaidan)
 print(f"\n--- データベースに保存しました (ID: {record_id}) ---")
 
-# 保存されているすべての俳句を表示
-print("\n--- 保存されている俳句一覧 ---")
-all_haikus = get_all_haikus()
-for haiku_record in all_haikus:
-    id_, haiku_text, created_at = haiku_record
+# 保存されているすべての俳句を表示<- 怪談に変更
+print("\n--- 保存されている怪談一覧 ---")
+all_kaidan = get_all_kaidan()
+for kaidan_record in all_kaidan:
+    id_, kaidan_text, created_at = kaidan_record
     print(f"[ID: {id_}] {created_at}")
-    print(f"{haiku_text}")
+    print(f"{kaidan_text}")
     print("-" * 30)

@@ -24,7 +24,7 @@ contents = [
         role="user",  # メッセージの送信者（ユーザー）を指定
         parts=[
             # Part.from_text()でテキスト形式のメッセージを作成
-            types.Part.from_text(text="俳句を作ってください。"),
+            types.Part.from_text(text="怪談話を一つ教えてください。"),
         ],
     ),
 ]

@@ -141,7 +141,7 @@ print(f"\n--- データベースに保存しました (ID: {record_id}) ---")
 
 # 保存されているすべての俳句を表示<- 怪談に変更
 print("\n--- 保存されている怪談一覧 ---")
-all_kaidan = get_all_kaidan()
+all_kaidan = get_all_kaidans()
 for kaidan_record in all_kaidan:
     id_, kaidan_text, created_at = kaidan_record
     print(f"[ID: {id_}] {created_at}")

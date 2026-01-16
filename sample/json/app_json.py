@@ -24,11 +24,32 @@ st.markdown("""
     p, div {
         color: white !important;
     }
+
+    /* お化けの絵文字をゆらゆら動かすアニメーション */
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+        25% {
+            transform: translateY(-5px) rotate(1deg);
+        }
+        50% {
+            transform: translateY(-10px) rotate(0deg);
+        }
+        75% {
+            transform: translateY(-5px) rotate(-1deg);
+        }
+    }
+
+    .floating-ghost {
+        display: inline-block;
+        animation: float 3s ease-in-out infinite;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # タイトル
-st.title("👻怪談話")
+st.markdown('<h1><span class="floating-ghost">👻</span>怪談話</h1>', unsafe_allow_html=True)
 st.write("テキストを入力すると、AIが怖い話を作成します")
 
 # テキスト入力
@@ -36,6 +57,13 @@ input_text = st.text_area(
     "テキストを入力してください",
     placeholder="例: 深夜のコンビニで起きた不思議な出来事について怖い話を作って。",
     height=120
+)
+
+# トーン選択
+selected_tone = st.selectbox(
+    "怪談のトーンを選択してください",
+    ["自動判定", "不気味", "恐怖", "悲哀"],
+    help="「自動判定」を選ぶとAIが自動的にトーンを決定します"
 )
 
 # 生成ボタン
@@ -55,18 +83,27 @@ if st.button("怪談を生成", type="primary"):
                 client = genai.Client(api_key=api_key)
 
                 # プロンプト作成（出力はJSON）
+                if selected_tone == "自動判定":
+                    prompt_text = (
+                        f"次のテキストについて怪談を作成してください:\n{input_text}\n\n"
+                        "出力はJSON形式で次のキーのみを含めてください:\n"
+                        "{'story': 'ここに怪談の本文', 'tone': '不気味or恐怖or悲哀or不明'}\n"
+                        "他の情報や説明は含めないでください。"
+                    )
+                else:
+                    prompt_text = (
+                        f"次のテキストについて怪談を作成してください:\n{input_text}\n\n"
+                        f"指定されたトーン「{selected_tone}」で作成してください。\n\n"
+                        "出力はJSON形式で次のキーのみを含めてください:\n"
+                        f"{{'story': 'ここに怪談の本文', 'tone': '{selected_tone}'}}\n"
+                        "他の情報や説明は含めないでください。"
+                    )
+
                 contents = [
                     types.Content(
                         role="user",
                         parts=[
-                            types.Part.from_text(
-                                text=(
-                                    f"次のテキストについて怪談を作成してください:\n{input_text}\n\n"
-                                    "出力はJSON形式で次のキーのみを含めてください:\n"
-                                    "{'story': 'ここに怪談の本文', 'tone': '不気味or恐怖or悲哀or不明'}\n"
-                                    "他の情報や説明は含めないでください。"
-                                )
-                            ),
+                            types.Part.from_text(text=prompt_text),
                         ],
                     ),
                 ]
